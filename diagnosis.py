@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Deep diagnosis of model performance issues
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.dummy import DummyClassifier

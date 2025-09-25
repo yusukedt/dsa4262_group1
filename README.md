@@ -1,6 +1,6 @@
 # m6A Modification Prediction Pipeline
 
-This repository contains scripts for generating datasets, training a machine learning model, and predicting m6A modification sites in RNA sequences.
+This repository contains scripts for generating datasets, training a logistic regression model, and predicting m6A modification sites in RNA sequences.
 
 ---
 
@@ -102,7 +102,7 @@ Predictions > 0.5: 482 (48.2%)
 - Roughly half of the samples have predicted scores above 0.5.
 
 - **Sample predictions**
-   transcript_id  transcript_position     score
+transcript_id transcript_position score
 0 ENST00000200042 101 0.594985
 1 ENST00000200042 233 0.182885
 ...

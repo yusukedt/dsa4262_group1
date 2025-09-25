@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-m6A RNA Modification Prediction - Training Script
-Author: Your Name
-Description: Trains a logistic regression model to predict m6A modifications from direct RNA-Seq data
-"""
-
 import pandas as pd
 import numpy as np
 import pickle
@@ -31,10 +24,6 @@ class M6APredictor:
             balance_strategy: Strategy to handle imbalanced data
                 - 'class_weight': Use class weights in logistic regression
                 - 'smote': Use SMOTE oversampling
-                - 'borderline_smote': Use Borderline SMOTE
-                - 'adasyn': Use ADASYN adaptive sampling
-                - 'smote_tomek': Use SMOTE + Tomek links
-                - 'smote_enn': Use SMOTE + Edited Nearest Neighbours
                 - 'undersample': Use random undersampling
                 - 'enn': Use Edited Nearest Neighbours undersampling
             scaler_type: Type of feature scaling ('standard' or 'robust')
@@ -298,11 +287,11 @@ class M6APredictor:
             
             self.model = LogisticRegression(
                 random_state=self.random_state,
-                max_iter=2000,  # Increased iterations
+                max_iter=2000,
                 class_weight=class_weight_dict,
                 penalty='l2',
                 C=1.0,
-                solver='liblinear'  # Better for small datasets
+                solver='liblinear'
             )
         else:
             self.model = LogisticRegression(
@@ -313,7 +302,7 @@ class M6APredictor:
                 solver='liblinear'
             )
         
-        # Perform cross-validation if requested
+        # Perform cross-validation
         if use_cv:
             print(f"\nPerforming {cv_folds}-fold cross-validation...")
             cv_scores_roc = cross_val_score(self.model, X_balanced, y_balanced, 
@@ -339,7 +328,7 @@ class M6APredictor:
         train_metrics = self._evaluate_model(X_scaled, y, "Training")
         self.training_stats.update(train_metrics)
         
-        # Evaluate on validation data if provided
+        # Evaluate on validation data
         if validation_df is not None:
             X_val_original = validation_df[self.original_feature_names].values
             X_val_engineered, _ = self._engineer_features(X_val_original, self.original_feature_names)
@@ -421,7 +410,7 @@ def main():
     print(f"Number of unique genes: {merged_df['gene_id'].nunique()}")
     print(f"Number of unique transcripts: {merged_df['transcript_id'].nunique()}")
     
-    # Initialize predictor
+    # Initialise predictor
     predictor = M6APredictor(
         balance_strategy=args.balance_strategy,
         scaler_type=args.scaler_type,

@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-m6A RNA Modification Prediction - Prediction Script
-Author: Your Name
-Description: Makes predictions on new data using a trained m6A modification model
-"""
-
 import pandas as pd
 import numpy as np
 import pickle
@@ -27,7 +20,7 @@ class M6APredictor:
     
     def _engineer_features_predict(self, X, original_feature_names):
         """
-        Apply the same feature engineering as during training - enhanced version
+        Apply the same feature engineering as during training
         """
         # Original features
         X_engineered = X.copy()
@@ -266,20 +259,16 @@ class M6APredictor:
         
         # Get the base prediction
         base_predictions = self.predict(df)
-        
-        # For simplicity, we'll estimate confidence based on prediction uncertainty
-        # In a real implementation, you might retrain models on bootstrap samples
         base_scores = base_predictions['score'].values
         
-        # Estimate confidence intervals based on score distribution and model uncertainty
-        # This is a simplified approach - more sophisticated methods exist
+        # 95% confidence interval
         score_std = np.std(base_scores)
-        confidence_factor = 1.96  # 95% confidence interval
+        confidence_factor = 1.96 
         
-        # Simple confidence estimation (in practice, you'd use more sophisticated methods)
+        # Confidence estimation
         confidence_width = np.minimum(
             confidence_factor * score_std * np.sqrt(base_scores * (1 - base_scores)),
-            0.1  # Cap the maximum uncertainty
+            0.1
         )
         
         predictions_with_ci = base_predictions.copy()
@@ -337,7 +326,7 @@ def main():
     except Exception as e:
         raise Exception(f"Error loading data from {data_path}: {str(e)}")
     
-    # Initialize predictor and load model
+    # Initialise predictor and load model
     predictor = M6APredictor()
     predictor.load_model(model_path)
     

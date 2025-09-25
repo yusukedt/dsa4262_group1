@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Generate synthetic test data for m6A prediction pipeline
-This creates realistic datasets that match the expected format for testing
-"""
-
 import pandas as pd
 import numpy as np
 import argparse
@@ -164,18 +158,18 @@ def generate_test_data(n_samples=1000, n_genes=20, m6a_rate=0.05,
             else:
                 prob *= 2  # Moderate DRACH motifs
         
-        # Gene-specific effects (some genes have higher m6A rates)
+        # Gene-specific effects
         gene_hash = hash(row['gene_id']) % 100
         if gene_hash < 20:  # 20% of genes are "high m6A" genes
             prob *= 2
         elif gene_hash > 80:  # 20% of genes are "low m6A" genes
             prob *= 0.5
         
-        # Position effects (some regions of transcripts have higher rates)
-        if 500 <= row['transcript_position'] <= 2000:  # CDS regions typically higher
+        # Position effects
+        if 500 <= row['transcript_position'] <= 2000:
             prob *= 1.5
         
-        # Ensure probability doesn't exceed 1
+        # Ensure probability does not exceed 1
         prob = min(prob, 0.8)  # Cap at 80% to maintain realism
         
         # Generate label
