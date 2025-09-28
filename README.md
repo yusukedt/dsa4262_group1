@@ -10,9 +10,9 @@ We implement different machine learning classifiers to predict modification site
 - Used `5_genes.csv` dataset with gene-based split for train/val/test.  
 - Handled class imbalance using `scale_pos_weight`.  
 
-## train_xgb.py
+## train_xgb.ipynb
 
-The `train_xgb.py` script is used to train an **XGBoost classifier** for m6A site prediction.  
+The `train_xgb.ipynb` notebook is used to train an **XGBoost classifier** for m6A site prediction.  
 This serves as an alternative to logistic regression, SVM, and random forest models.
 
 - **Dataset loading and summary**
