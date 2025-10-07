@@ -1,2 +1,1 @@
-# dsa4262_group1
-DSA4262 Project Repository
+# SVM Model Training and Output
