@@ -21,7 +21,7 @@ Settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" rec
 
 
 ## 2. SVM model training 
-Support Vector Machines, traditionally referred to as SVM, are a type of supervised machine learning algorithm generally used for binary classification. I picked it as it is a robust model for high-dimensional data (due to the large number of features used for training). The entire dataset is split randomly into training and test data sets in a 4:1 ratio.
+Support Vector Machines, traditionally referred to as SVM, are a type of supervised machine learning algorithm generally used for binary classification. It is picked because it is a robust model for high-dimensional data (due to the large number of features used for training). The remaining dataset (after taking a random subset of the "0" records + all the "1" records) is split randomly into training and test data sets in a 4:1 ratio.
 
 ## 3. SVM model optimization
 Ran 5-fold Cross Validation with hyperparameter tuning of the SVM model, with the range of parameters defined as C: [1, 10, 100], gamma: [0.0001, 0.001, 0.01], kernel: ['rbf', 'linear'], in hopes to find the combination of parameters that optimizes the model most efficiently. 
