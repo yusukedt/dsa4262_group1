@@ -36,7 +36,7 @@ The optimized model has the following evaluation metrics:
 - F1 Score: 0.568
 
 ## 5. Final model output
-Running the model on the held-out test set will give the probability scores. The **results.csv** file is in the format as such:
+Running the model on the provided test sets will give the probability scores. The **dataset1_predictions.csv** file is produced after testing the model on the dataset **dataset1.json** and is in the format as such:
 | transcript_id | transcript_position | score |
 | :------------- | :------------------: | -------------------: |
 | Transcript ID for every row of data.json | Represents the position within transcript ID | Probability that the position within that transcript has m6A modification |
