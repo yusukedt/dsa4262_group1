@@ -17,7 +17,7 @@ There are several ways to solve this. I took into account the following techniqu
 
 Each way can change the final model output and its evaluation metrics. I tested all three techniques and weighed their limitations. I believe that creating synthetic data may not reflect variability of actual data. It is also imperative to note that replicating such data in large amounts, thousands on thousands of records, is not accurate and can contribute to the final model's training ineffectiveness.
 
-Settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" records to "1" records that is 6:1 (so as to capture as much real data as possible), and applying class weighting while training the SVM model.
+Settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" records to "1" records that is 6:1 (so as to capture as much real data as possible), and applying class weighting while training the SVM model to offset some of the imbalancement.
 
 
 ## 2. SVM model training 
