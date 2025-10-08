@@ -17,16 +17,16 @@ There are several ways to solve this. I took into account the following techniqu
 
 Each way can change the final model output and its evaluation metrics. I tested all three techniques and weighed their limitations. I believe that creating synthetic data may not reflect variability of actual data. It is also imperative to note that replicating such data in large amounts, thousands on thousands of records, is not accurate and can contribute to the final model's training ineffectiveness.
 
-Therefore, I settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" records to "1" records that is 6:1 (so as to capture as much real data as possible), and applying class weighting while training the SVM model.
+Settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" records to "1" records that is 6:1 (so as to capture as much real data as possible), and applying class weighting while training the SVM model.
 
 
 ## 2. SVM model training 
 Support Vector Machines, traditionally referred to as SVM, are a type of supervised machine learning algorithm generally used for binary classification. I picked it as it is a robust model for high-dimensional data (due to the large number of features used for training). The entire dataset is split randomly into training and test data sets in a 4:1 ratio.
 
 ## 3. SVM model optimization
-I ran 5-fold Cross Validation with hyperparameter tuning of the SVM model, with the range of parameters defined as C: [1, 10, 100], gamma: [0.0001, 0.001, 0.01], kernel: ['rbf', 'linear'], in hopes to find the combination of parameters that optimizes the model most efficiently. 
+Ran 5-fold Cross Validation with hyperparameter tuning of the SVM model, with the range of parameters defined as C: [1, 10, 100], gamma: [0.0001, 0.001, 0.01], kernel: ['rbf', 'linear'], in hopes to find the combination of parameters that optimizes the model most efficiently. 
 
-Implemented gridSearch CV, a technique for hyperparameter tuning to search for this optimal combination. The final model has the parameters C = 10, gamma = 0.01 and kernel = 'rbf' that gives the **highest accuracy** among all combinations of parameters. This is performed on a subset of the data, with the number of "0" records to "1" records in the ratio of 3:1 for quick tuning.
+Implemented gridSearch CV, a technique for hyperparameter tuning to search for this optimal combination. The final model has the parameters C = 100, gamma = 0.01 and kernel = 'rbf' that gives the **highest accuracy** among all combinations of parameters. This is performed on a subset of the data, with the number of "0" records to "1" records in the ratio of 3:1 for quick tuning.
 
 ## 4. Final model evaluation
 The optimized model has the following evaluation metrics:
@@ -35,12 +35,12 @@ The optimized model has the following evaluation metrics:
 - PR-AUC Score: 0.612
 - F1 Score: 0.568
 
-## 5. Final model output
+### Final model predictions
 Running the model on the provided test sets will give the probability scores. The **dataset1_predictions.csv** file is produced after testing the model on the dataset **dataset1.json** and is in the format as such:
 | transcript_id | transcript_position | score |
 | :------------- | :------------------: | -------------------: |
 | Transcript ID for every row of data.json | Represents the position within transcript ID | Probability that the position within that transcript has m6A modification |
 
 
-## Final Model
+### Final Model
 The final SVM model is stored as **trained_svm.pkl** .
