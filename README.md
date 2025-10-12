@@ -116,3 +116,54 @@ Fine-tuning was conducted with **GridSearchCV** on the following parameters:
   "scale_pos_weight": 3,
   "subsample": 1.0
 }
+```
+
+### **Evaluation results**
+
+**Validation set**
+
+- Accuracy = 0.556  
+- ROC-AUC = 0.751  
+- PR-AUC = 0.110  
+
+**Test set**
+
+| Metric | Value |
+|:--|:--:|
+| Accuracy | 0.744 |
+| **ROC-AUC** | **0.832** |
+| PR-AUC | 0.231 |
+| **Weighted F1** | **0.823** |
+| Precision (1) | 0.105 |
+| Recall (1) | 0.752 |
+| F1 (1) | 0.185 |
+
+**Confusion Matrix**
+
+
+---
+
+### **Interpretation**
+
+- **ROC-AUC = 0.832 → good separability** between m6A and non-m6A sites.  
+- **High recall (0.75)** highlights the model successfully detects most true m6A sites.  
+- **Low precision (0.11)** is expected but still low because positives form only ~4 % of the dataset.  
+- **Weighted F1 = 0.823** shows strong overall balance between precision and recall.  
+- Stable performance across validation and test confirms good generalisation.
+
+---
+
+### **Outputs**
+
+| File | Description |
+|:--|:--|
+| `xgb_best_model (1).pkl` | Fine-tuned XGBoost model |
+| `xgb_best_params.json` | Optimal hyperparameters |
+| `xgb_eval_results.json` | Evaluation metrics |
+
+All outputs allow direct reuse without retraining.
+
+---
+
+
+
