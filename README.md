@@ -44,4 +44,75 @@ This serves as an alternative to logistic regression, SVM, and random forest mod
 
 - **Outputs**
   
-  Predictions saved to `xgb_predictions.csv` in required format:  
+  Predictions saved to `xgb_predictions.csv` in required format
+
+
+## Fine-Tuned XGBoost Model
+
+The fine-tuning stage builds upon the baseline model (`train_xgb.ipynb`) by improving class balance handling and optimising hyperparameters through grid search.  
+This work is implemented in the notebook **`finetuning (1).ipynb`**, and the trained outputs are saved as:
+
+- `xgb_best_model (1).pkl` – fine-tuned XGBoost model  
+- `xgb_best_params.json` – optimal hyperparameters  
+- `xgb_eval_results.json` – evaluation metrics and confusion matrix  
+
+---
+
+### **Dataset loading and summary**
+
+**Dataset:** `50_genes.csv`  
+**Shape:** (128,461, 14)  
+**Columns:** `['gene_id', 'transcript_id', 'transcript_position', 'sequence', 'label', 'feature_1', ..., 'feature_9']`  
+**m6A rate:** 0.0291 (~3%)  
+**Unique genes:** 50  
+**Unique transcripts:** 62  
+
+The dataset contains 128,461 transcript positions with numerical features and binary labels.  
+It is **highly imbalanced**, with approximately **96 % negatives** and **4 % positives**.
+
+---
+
+### **Data splitting**
+
+| Split | Samples | m6A Ratio |
+|:--|:--:|:--:|
+| Train | 76,984 | 0.037 |
+| Validation | 25,692 | 0.030 |
+| Test | 25,693 | 0.031 |
+
+Splitting was performed using stratified sampling (60 / 20 / 20) to maintain class proportions.
+
+---
+
+### **Class balancing**
+
+- Original distribution: `label = 0` ≈ 74 k | `label = 1` ≈ 3 k  
+- Applied **random undersampling** of majority class (no SMOTE).  
+- Final training ratio ≈ **3 : 1** (negative : positive).  
+- Validation and test sets remain naturally imbalanced to reflect real data.
+
+---
+
+### **Model fine-tuning**
+
+Fine-tuning was conducted with **GridSearchCV** on the following parameters:
+
+| Parameter | Search Range |
+|:--|:--|
+| `n_estimators` | [100, 200, 300] |
+| `max_depth` | [3, 5, 7] |
+| `learning_rate` | [0.01, 0.1, 0.3] |
+| `subsample` | [0.7, 1.0] |
+| `colsample_bytree` | [0.7, 1.0] |
+| `scale_pos_weight` | [3] |
+
+**Best parameters:**
+```json
+{
+  "colsample_bytree": 0.7,
+  "learning_rate": 0.1,
+  "max_depth": 7,
+  "n_estimators": 100,
+  "scale_pos_weight": 3,
+  "subsample": 1.0
+}
