@@ -161,7 +161,6 @@ Fine-tuning was conducted with **GridSearchCV** on the following parameters:
 | `xgb_best_params.json` | Optimal hyperparameters |
 | `xgb_eval_results.json` | Evaluation metrics |
 
-All outputs allow direct reuse without retraining.
 
 ---
 
