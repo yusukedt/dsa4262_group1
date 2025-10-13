@@ -5,7 +5,7 @@ DSA4262 Project Repository
 This task focuses on the identification of RNA m6A modifications from direct RNA-Seq data.  
 We implement different machine learning classifiers to predict modification sites based on features extracted from nanopore signals.
 
-## My Contribution
+## Baseline Model
 - Implemented **XGBoost model** (`train_xgb.py`) as an alternative to logistic regression, SVM, and RF.  
 - Used `5_genes.csv` dataset with gene-based split for train/val/test.  
 - Handled class imbalance using `scale_pos_weight`.  
