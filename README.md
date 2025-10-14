@@ -53,14 +53,8 @@ This second model produces the following evaluation metrics:
 - Recall: 0.7569721115537849
 
 ### Model comparison and decision
-While both models produce roughly similar evaluation metrics, the second model is preferred. Compare the confusion matrices of both models:
-Model 1:
-[[19899  4096]
- [  247   757]]
- Model 2:
- [[19950  4045]
- [  244   760]]
- Predicting true positives and true negatives more accurately sets the second model apart from the first model. Note that low precision and PR_AUC scores do not mean the model is inherently bad; this is just a case of working with imbalanced test data.
+While both models produce roughly similar evaluation metrics, the second model is preferred. Compare the confusion matrices of both models.
+Predicting true positives and true negatives more accurately sets the second model apart from the first model. Note that low precision and PR_AUC scores do not mean the model is inherently bad; this is just a case of working with imbalanced test data.
 
 ### Model predictions
 Running the model on the test set gives the probability scores. The predictions for test data should be in the format as such:
