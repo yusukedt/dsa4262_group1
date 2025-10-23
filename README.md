@@ -62,6 +62,9 @@ Running the model on the test set gives the probability scores. The predictions 
 | :------------- | :------------------: | -------------------: |
 | Transcript ID for every row of data.json | Represents the position within transcript ID | Probability that the position within that transcript has m6A modification |
 
-### 
+
 ### Final Model
 The final SVM model is stored as **svm_train_2.pkl** .
+
+### svm_task2
+A reference guide on how to use `svm_train_2.pkl` to predict m6A modifications on data, as well as data manipulation to feed the correct columns to the model. A sample test dataset, `test_set.csv` is used here to produce the result `test_result.csv`.
