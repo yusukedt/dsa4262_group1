@@ -14,15 +14,6 @@ def load_pkl(file_path):
         print(f"Error loading .pkl file: {e}")
         sys.exit(1)
 
-# Function to load input data (e.g., from a CSV file)
-def load_input(input_file):
-    try:
-        data = pd.read_csv(input_file)  # Adjust if input is JSON, text, etc.
-        return data
-    except Exception as e:
-        print(f"Error loading input file: {e}")
-        sys.exit(1)
-
 def aggregation(record):
     aggregates = []
 
@@ -48,8 +39,6 @@ if __name__ == "__main__":
     
     loaded_model = load_pkl(pkl_file)
     
-    # Load the input data
-    input_data = load_input(input_file)
 
     data = []
     with open(input_file, 'r', encoding='utf-8') as f:
@@ -93,4 +82,5 @@ if __name__ == "__main__":
         print(f"Error processing input: {e}")
     
     # If you need to save the output, e.g., to a file
+
     # pd.DataFrame(output).to_csv('output.csv', index=False)
