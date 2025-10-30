@@ -1,156 +1,70 @@
-# m6A Modification Prediction Pipeline
+# Task 1 Objectives 
+This README is a guide reflecting the thought process for code in training the SVM model. **random_state = 42** is used to ensure reproducibility of results.
 
-This repository contains scripts for generating datasets, training a logistic regression model, and predicting m6A modification sites in RNA sequences.
+## 1. Importing and Transformation of the training data
+The data is available as features and labels, in **dataset0.json** and **data.info.labelled** respectively. Each line of **dataset0.json** describes the nanopore direct RNA sequencing reads aligned to the reference transcript sequences.
 
----
+### 1. Aggregation of feature data for all reads
+Each line of the json file describes many sequencing reads. This implies hundreds of duplicates of transcript ID and position if we want to treat each read as a single item. Suppose we treat each read as a single item, the runtime of training the algorithm will take too long. To ensure sanity, while transforming the data, account for the averages of all 9 feature data for each unique transcript ID and position. Mean is preferred to median and geometric mean because it captures the variability of the data and is more suitable for magnitude data respectively. 
 
-## train.py
+### 2. Splitting data
+To prevent data leakage (in the event that the test set contains records with `gene_id` already found in the training set), the dataset is split into training and test sets randomly, in the ratio of 4:1, without having `gene_id` repeated across training and test sets. This ensures the test set truly simulates unseen data.
 
-The `train.py` script is used to train the m6A prediction model. Key outputs and their meanings:
+### 3. Accounting for imbalanced data
+Observing the number of 0 labels to 1 labels in the training set shows that we are dealing with a severly imbalanced dataset. Class imbalance is a problem for SVM because there will be bias toward the majority class, which is the labelled "0" records. If the entire dataset is used without any method to balance out the classes, the trained model will almost always predict the label 0, which when used on unseen test data with a similar ratio of "0" records to "1" records, will generate high accuracy but a poor roc-auc measurement of 0.5, which is no better than the performance of a random classifier.
 
-- **Dataset loading and summary**
+There are several ways to solve this issue. The following techniques are taken into consideration:
+1. Class weighting while training the model (using `class_weight = "balanced"` in SVM to penalize misclassification of minority-class samples)
+2. Resampling the data to reduce imbalance - undersampling the majority class (randomly sample a subset of "0" records instead of all "0" records, that roughly satisfies a ratio of 2 to 3:1 to the total number of "1" records - milder imbalance)
+3. Resampling the data to reduce imbalancement - oversampling the minority class using SMOTE (produce new minority samples to increase the number of "1" records)
 
-  Dataset shape: (128461, 14)  
-  Columns: ['gene_id', 'transcript_id', 'transcript_position', 'sequence', 'label', 'feature_1', ..., 'feature_9']  
-  m6A modification rate: 0.0291  
-  Number of unique genes: 50  
-  Number of unique transcripts: 62  
+After testing all three techniques and weighing their limitations, technique 3 will not be continued. The belief is that creating synthetic data does not reflect variability and distribution of actual data. It is also imperative to note that creating such data in large amounts, thousands upon thousands of records, is not accurate and will contribute to the final model's training ineffectiveness because it overfits the noise from synthetic data (not good representations of either class). In fact, oversampling with SMOTE reduced the test performance of SVM compared to the standard experiment of training SVM on a near 1:1 ratio of "0" records to "1" records.
 
-  The dataset contains 128,461 samples with 14 columns, including sequence features and labels.  
-  m6A sites are rare, with ~2.9% of positions modified.
+Settled on a hybrid between techniques 1 and 2; taking a larger ratio of "0" records to "1" records that is near to 4:1 (so as to capture as much real data as possible), and applying class weighting while training the SVM model to offset some of this imbalance.
 
-- **Data splitting**
 
-  Train genes: 35, samples: 68749, m6A ratio: 0.0395  
-  Val genes: 5, samples: 30726, m6A ratio: 0.0150  
-  Test genes: 10, samples: 28986, m6A ratio: 0.0192  
+## 2. The SVM model
+### Introduction
+Support Vector Machines, traditionally referred to as SVMs, are a type of supervised machine learning algorithm generally used for classification problems. It is picked because it is a robust model for high-dimensional data, due to the large number of features in the data.
 
-  The dataset is split by gene_id into train/validation/test sets to avoid leakage.  
-  m6A modification rates vary across splits.
+### Optimization
+Implemented GridSearchCV, a technique for hyperparameter tuning to search for an optimal combination of parameters. This technique applies 5-fold Cross Validation while tuning the model, using the ranges of parameters defined as C: [1, 10, 100], gamma: [0.0001, 0.001, 0.01], kernel: ['rbf', 'linear'].
 
-- **Feature engineering**
+The final model has the parameters C = 100, gamma = 0.01 and kernel = 'rbf', which gives the highest accuracy among all combinations. This is performed on a subset of the training data, with the number of "0" records to "1" records in the near ratio of 1:1 for quick and effective tuning. The objective of this step is to simply find the best combination of parameters, judged using the default scoring metric of accuracy.
 
-  Original features: 9  
-  Engineered features: 23  
+### Model 1 evaluation
+The optimized model has the following evaluation metrics:
+- Accuracy: 0.826
+- ROC-AUC Score: 0.863
+- PR-AUC Score: 0.323
+- F1 Score: 0.568
+- Precision: 0.156
+- Recall: 0.754
 
-  Additional features were generated to improve model performance.
+### Model 2 training and evaluation
+A second model is trained with the same parameters but differently; instead of taking the first 16000 records from a shuffled dataframe of "0" records in the case for the first model, the last 16000 records were taken. 
 
-- **Class balancing**
+This second model produces the following evaluation metrics:
+- SVM Accuracy: 0.828
+- ROC_AUC Score: 0.860
+- PR_AUC Score: 0.310
+- F1 Score: 0.262
+- Precision: 0.158
+- Recall: 0.757
 
-  Original class distribution: [66034  2715]  
-  Resampled class distribution: [66034 66034]  
+### Model comparison and decision
+While both models produce roughly similar evaluation metrics, the second model is preferred.
+Predicting true positives and true negatives more accurately sets the second model apart from the first model. Note that low precision and PR_AUC scores do not mean the model is inherently bad; this is just a case of working with imbalanced test data.
 
-  SMOTE is applied to balance the dataset for rare m6A sites.
+### Model predictions
+Running the model on the test set gives the probability scores. The predictions for test data should be in the format as such:
+| transcript_id | transcript_position | score |
+| :------------- | :------------------: | -------------------: |
+| Transcript ID for every row of data.json | Represents the position within transcript ID | Probability that the position within that transcript has m6A modification |
 
-- **Cross-validation performance**
 
-  CV AUC-ROC: 0.6975 ± 0.0274  
-  CV AUC-PR: 0.6320 ± 0.0175  
+### Final Model
+The final SVM model is stored as **svm_train_2.pkl** .
 
-  The model shows reasonable predictive ability in cross-validation.
-
-- **Final model metrics**
-
-  Training AUC-ROC: 0.6924  
-  Validation AUC-ROC: 0.7735  
-  Test AUC-ROC: 0.7050  
-
-  Performance is consistent across train, validation, and test sets.  
-  Average precision values are low due to class imbalance in the original data.
-
-- **Outputs**
-
-  Model saved to `model/m6a_model.pkl`  
-  Training statistics saved to `model/m6a_model_stats.json`
-
----
-
-## generate.py
-
-The `generate.py` script generates new test data for prediction. Key outputs:
-
-- **Dataset summary**
-
-  Total samples: 1000  
-  Unique genes: 20  
-  Unique transcripts: 20  
-  m6A modification rate: 0.1340  
-  m6A positive samples: 134  
-
-  Generates 1,000 samples with 13 features for prediction.  
-  Approximately 13.4% of positions are m6A-modified in the generated dataset.
-
-- **Feature statistics**
-
-  feature_1: mean=0.0057, std=0.0029, min=0.0008, max=0.0215  
-  feature_2: mean=4.0159, std=2.9567, min=0.0647, max=23.2700  
-  ...  
-  feature_9: mean=94.1583, std=15.8096, min=46.1828, max=153.8936  
-
-  Shows the distribution of numeric features in the generated dataset.
-
-- **Sequence analysis**
-
-  Most frequent sequences: AAACC (15.0%), AGACC (13.1%), GGACT (11.8%), TAACC (10.3%), GAACC (10.0%), AGACT (9.9%)  
-
-  Summarizes the frequency of common 5-mer sequences in the dataset.
-
-- **Output**
-
-  Prediction data saved to `test_data/test_genes_predict.csv`
-
----
-
-## predict.py
-
-The `predict.py` script predicts m6A modification probabilities using the trained model.
-
-- **Input data**
-
-  Loaded 1000 samples from `test_data/test_genes_predict.csv`  
-  Columns: ['gene_id', 'transcript_id', 'transcript_position', 'sequence', 'feature_1', ..., 'feature_9']
-
-  Uses the generated test dataset.
-
-- **Model information**
-
-  Model trained with 23 features  
-  Original features: 9  
-  Balance strategy: SMOTE  
-  Scaler type: standard  
-
-  Shows feature count, class balancing method, and scaling used during training.
-
-- **Prediction statistics**
-
-  Total predictions: 1000  
-  Score distribution - Min: 0.0000, Max: 1.0000, Mean: 0.4997, Median: 0.4612  
-  Predictions > 0.5: 482 (48.2%)  
-
-  Predictions are probabilities between 0 and 1.  
-  Roughly half of the samples have predicted scores above 0.5.
-
-- **Sample predictions**
-```
-      transcript_id  transcript_position     score
-  0  ENST00000200042                  101  0.594985
-  1  ENST00000200042                  233  0.182885
-  2  ENST00000200042                  341  1.000000
-  3  ENST00000200042                  455  0.005807
-  4  ENST00000200042                  504  0.739772
-```
-  Example rows of predicted scores for specific transcript positions.
-
-- **Output**
-
-  Predictions saved to `output/predictions.csv`
-
----
-
-## Summary
-
-- `train.py` → trains the m6A prediction model with feature engineering and SMOTE balancing.  
-- `generate.py` → generates test data for model prediction.  
-- `predict.py` → predicts m6A probabilities on new sequences using the trained model.  
-
-All scripts save outputs in the `model/` or `test_data/` folders for reproducibility and downstream analysis.
+### svm_task2
+A reference guide on how to use `svm_train_2.pkl` to predict m6A modifications on data, as well as data manipulation to feed the correct columns to the model. A sample test dataset, `test_set.csv` is used here to produce the result `test_result.csv`.
